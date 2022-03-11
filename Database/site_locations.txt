@@ -1,0 +1,11 @@
+ lat lon site acc
+0 -5.65 -48.12 Araguatins ara
+1 -15.6 -56.1 Cuiaba cba
+2 -3.89 -38.45 Eusebio eus
+3 -17.88 -51.72 Jatai jat
+4 -36.08 -69.71 "Rio Grande" rga
+5 -23.19 -45.89 "Sao Jose Dos Campos" sjc
+6 -2.53 -44.3 "Sao Luis" slz
+7 -29.54 -53.85 "Sao Martinho Da Serra" sms
+8 -26.56 -64.88 Tucuman tcm
+9 -22.41 -43.66 Vassouras vss
