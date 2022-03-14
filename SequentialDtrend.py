@@ -21,7 +21,7 @@ from MagnetometersAnalysis import *
 
 # Select area for to shade (analysis)
 tm1 = datetime.datetime(2022, 1, 15, 13, 0)
-tm2 = datetime.datetime(2022, 1, 15, 17, 0)
+tm2 = datetime.datetime(2022, 1, 15, 19, 0)
 
 
 component = 'H(nT)'
@@ -30,7 +30,7 @@ N = 10
 
 
 infile = 'G:\\My Drive\\Python\\doctorate-master\\'\
-        'AtmospherePhysics\\Database\\'
+        'MagnetometerAnalysis\\Database\\'
 folder = 'Magnetometer15012022\\'
 
 #Get sites informations from array in the file
@@ -97,7 +97,8 @@ fig.suptitle(f'EMBRACE Magnetometers Network\n dTrend - {tm2.date()}',
 
 plt.rcParams.update({'font.size': 12})    
 
-NameToSave = f'{ylabel}1512022dtrend.png'
 
-#save_plot(infile, NameToSave = NameToSave)
+NameToSave = f'{ylabel}{tm1.strftime("%d%m%Y")}dTrendAnalysis.png'
+
+save_plot(NameToSave, dpi = 100)
 plt.show()

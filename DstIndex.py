@@ -5,14 +5,14 @@ Created on Tue Mar  8 14:09:38 2022
 @author: LuizF
 """
 
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-import datetime
-import matplotlib.dates as dates
+import sys
+import os
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
 
-infile = 'G:\\My Drive\\Python\\doctorate-master\\AtmospherePhysics\\'\
-    'Database\\'
+from MagnetometersAnalysis import *
+
+infile = 'G:\\My Drive\\Python\\doctorate-master\\MagnetometerAnalysis\\Database\\'
 
 filename = 'Dst_012022.txt'
 
@@ -50,11 +50,11 @@ def monthly_plot(ax, df, start, end):
     
     ax.axhline(-50, color='black', linestyle=':', lw = 1)
     
-    ax.text(.99, 0.32, 'High activity', ha='right', va='bottom', 
+    ax.text(.99, 0.19, 'High activity', ha='right', va='bottom', 
             transform=ax.transAxes, size = 14)
     
     
-monthly_plot(ax[0], df)
+monthly_plot(ax[0], df, start, end)
 
 df.loc[df.index.day == 15, :].plot(ax = ax[1], label = None,
                                    color = 'k', lw = 1)
@@ -63,10 +63,7 @@ ax[1].set(xlabel = 'hours', ylabel = 'Dst index (nT)')
 
 plt.rcParams.update({'font.size': 12})    
 
-NameToSave = f'DstIndex{month}.png'
-path_to_save = infile + 'Figures\\'
-
-plt.savefig(path_to_save + NameToSave, dpi = 1000)
-
+NameToSave = f'DstIndexJanuary2022.png'
+save_plot(NameToSave, dpi = 100)
 
 plt.show()

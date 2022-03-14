@@ -21,11 +21,8 @@ sys.path.append(file_dir)
 from MagnetometersAnalysis import *
 
 
-infile = 'G:\\My Drive\\Python\\doctorate-master\\'\
-        'AtmospherePhysics\\Database\\'
+infile = 'G:\\My Drive\\Python\\doctorate-master\\MagnetometerAnalysis\\Database\\'
         
-    
-
 # Get data from São Luis and Rio Grande
 rga = concat_mag_files(infile, 'RGA')
 slz = concat_mag_files(infile, 'SLZ')
@@ -49,7 +46,7 @@ for ax, num in zip(axs.flat, range(2)):
     # Plot vertical component in the right axes
     vertical, = ax1.plot(data[num]['Z(nT)'], lw = 1)
     
-    setting_axes(ax1, color = vertical.get_color(), position = 'right')
+    change_color_axes(ax1, color = vertical.get_color(), position = 'right')
     
     #print(vertical.get_color())
 
@@ -93,9 +90,5 @@ plt.suptitle('EMBRACE Magnetometers \n Comparation between São Luis and Rio Gra
              y = 0.99)
 
 NameToSave = 'SaoLuis_RioGrande_Comparation.png'
-path_to_save = infile + 'Figures\\'
-
-plt.savefig(path_to_save + NameToSave, dpi = 1000)
-
-
+save_plot(NameToSave, dpi = 100)
 plt.show()

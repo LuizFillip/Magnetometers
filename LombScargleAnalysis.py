@@ -5,10 +5,6 @@ Created on Sun Mar  6 19:26:59 2022
 @author: LuizF
 """
 import sys
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-import datetime
 import os
 from astropy.timeseries import LombScargle
 
@@ -18,29 +14,20 @@ sys.path.append(file_dir)
 from MagnetometersAnalysis import *
 
 
+infile = 'G:\\My Drive\\Python\\doctorate-master\\MagnetometerAnalysis\\Database\\'
 
-path_main = 'G:\\My Drive\\Python\\doctorate-master\\AtmospherePhysics\\Database\\'
-
-
-infile = path_main + 'Magnetometer15012022\\'
-
-
+folder = 'Magnetometer15012022\\'
 
 tm1 = datetime.datetime(2022, 1, 15, 13, 0)
 tm2 = datetime.datetime(2022, 1, 15, 17, 0)
 
-
-
 N = 10
-component = 'Z(nT)'
+component = 'H(nT)'
 names, acc, lat, lon = sites_infos()
     
-
-
 fig, axs = plt.subplots(figsize = (6, 10), 
                        sharex = True, 
                        nrows = len(acc))
-
 plt.subplots_adjust(hspace = 0)
 
 best_period = {}
@@ -49,9 +36,9 @@ for ax, num in zip(axs.flat, range(len(acc))):
     
     # Use the sites locations (latitudes sorted) 
     # for get the acromics in crescent order
-    filename = f'{acc[num]}{day}jan.22m'
+    filename = f'{acc[num]}15jan.22m'
     
-    df = setting_dataframe(infile, filename, 
+    df = setting_dataframe(infile + folder, filename, 
                            component = component)
     
     df = df.loc[(df.index > tm1) & (df.index < tm2), :]
@@ -60,7 +47,8 @@ for ax, num in zip(axs.flat, range(len(acc))):
     t = df['time'].values
     
     remove_lines(ax, acc, num)
-    
+
+        
 
     try:
         period, power = plot_LombScargle(ax, t, y, 
@@ -78,13 +66,12 @@ for ax, num in zip(axs.flat, range(len(acc))):
 
 avg_period = np.array(list(best_period.values())).mean()
 
-print(avg_period)
+#print(best_period)
 
 for ax in axs.flat:    
-    ax.axvline(x=avg_period, label = 'Best period', )
+    ax.axvline(x=avg_period, label = 'Best period')
 
 ax.legend(loc = 'center', bbox_to_anchor=(0.5, 8.2), ncol = 2)
-
 
 if component == 'H(nT)':
     ylabel = 'Horizontal'
@@ -102,14 +89,9 @@ fig.text(0.01, 0.5, 'Power Density Spectral (normalized)', va='center',
 
 plt.rcParams.update({'font.size': 12})    
 
-
-NameToSave = f'{ylabel}{day}{mon}{yer}LombScargle.png'
-path_to_save = path_main + 'Figures\\'
-
-
-#plt.savefig(path_to_save + NameToSave, dpi = 1000, bbox_inches="tight")
-
-
+#Save the plate
+NameToSave = f'{ylabel}{tm1.strftime("%d%m%Y")}LombScargle.png'
+#save_plot(NameToSave, dpi = 100)
 plt.show()  
     
 

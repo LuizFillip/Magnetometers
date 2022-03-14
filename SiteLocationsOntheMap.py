@@ -5,9 +5,17 @@ Created on Sat Mar  5 15:21:57 2022
 @author: LuizF
 """
 
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np 
+import os.path
+import sys
+
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
+
+from MagnetometersAnalysis import *
+
+
+infile = 'G:\\My Drive\\Python\\doctorate-master\\MagnetometerAnalysis\\Database\\'
+
 import cartopy.feature as cf
 import cartopy.crs as ccrs
 import datetime
@@ -100,18 +108,6 @@ ax.set_yticks(np.arange(start_lat, end_lat + step_lat, step_lat),
               crs=ccrs.PlateCarree())
 
 
-sites = np.array([['Rio Grande', 'rga', -53.78, -67.70],
-                ['São Martinho da Serra', 'sms', -29.53,-53.85], 
-                ['Tucumán', 'tcm', -26.56, -64.88], 
-                ['São José Dos Campos', 'sjc', -23.19, -45.89], 
-                ['Vassouras', 'vss', -22.41, -43.66],
-                ['Jataí', 'jat', -17.88, -51.72], 
-                ['Cuiabá', 'cba', -15.60, -56.10], 
-                ['Araguatins', 'ara', -5.65, -48.12], 
-                ['Eusébio', 'eus',  -3.89, -38.45], 
-                ['São Luis', 'slz', -2.53, -44.30]])
-
-
 #get modeling values
 date = datetime.datetime(2022, 1, 15)
 df = table_igrf(start_lon, end_lon, step_lon, 
@@ -124,10 +120,11 @@ CS = ax.contour(df.columns, df.index, df.values, 15, cmap = 'jet')
 ax.clabel(CS, CS.levels, inline=True, fontsize=10)
 
 fontsize = 12
+names, acc, latitudes, longitudes = sites_infos(remove = None)
 
-for lat, lon, name in zip(pd.to_numeric(sites[:, 2]), 
-                          pd.to_numeric(sites[:, 3]), 
-                          sites[:, 0]):
+
+for lat, lon, name in zip(latitudes, longitudes, 
+                          names):
     
     ax.plot(lon, lat, 'o', color = 'red', 
             marker = '^', markersize = 10)
@@ -145,11 +142,7 @@ fig.suptitle(f'Sites locations of EMBRACE Magnetometers\n and Horizontal compone
 plt.rcParams.update({'font.size': fontsize})   
 
 NameToSave = 'SitesLocationsMagnetometers.png'
-path_to_save = infile = 'G:\\My Drive\\Python\\doctorate-master\\'\
-        'AtmospherePhysics\\Database\\Figures\\'
-
-plt.savefig(path_to_save + NameToSave, dpi = 1000, bbox_inches="tight")
-
+save_plot(NameToSave, dpi = 100)
 plt.show()
    
 
