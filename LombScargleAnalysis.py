@@ -4,10 +4,10 @@ Created on Sun Mar  6 19:26:59 2022
 
 @author: LuizF
 """
+
+from astropy.timeseries import LombScargle
 import sys
 import os
-from astropy.timeseries import LombScargle
-
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 
@@ -19,7 +19,7 @@ infile = 'G:\\My Drive\\Python\\doctorate-master\\MagnetometerAnalysis\\Database
 folder = 'Magnetometer15012022\\'
 
 tm1 = datetime.datetime(2022, 1, 15, 13, 0)
-tm2 = datetime.datetime(2022, 1, 15, 17, 0)
+tm2 = datetime.datetime(2022, 1, 15, 19, 0)
 
 N = 10
 component = 'H(nT)'
@@ -49,13 +49,13 @@ for ax, num in zip(axs.flat, range(len(acc))):
     remove_lines(ax, acc, num)
 
         
-
     try:
         period, power = plot_LombScargle(ax, t, y, 
                              minimum_period = 0.1, 
-                             maximum_period = 0.8)
+                             maximum_period = 0.7)
         
         best_period[names[num]] = period[np.argmax(power)]
+        ax.axvline(x = period[np.argmax(power)], label = 'Best period')
         ax.set(ylim = [0, 0.3], xlabel = 'Period (hours)')
     except:
         pass
@@ -66,10 +66,9 @@ for ax, num in zip(axs.flat, range(len(acc))):
 
 avg_period = np.array(list(best_period.values())).mean()
 
-#print(best_period)
+print(best_period)
+print(avg_period)
 
-for ax in axs.flat:    
-    ax.axvline(x=avg_period, label = 'Best period')
 
 ax.legend(loc = 'center', bbox_to_anchor=(0.5, 8.2), ncol = 2)
 

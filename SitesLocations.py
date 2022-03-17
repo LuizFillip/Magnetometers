@@ -108,8 +108,9 @@ ax.set_yticks(np.arange(start_lat, end_lat + step_lat, step_lat),
               crs=ccrs.PlateCarree())
 
 
-#get modeling values
+# Get modeling values from IGRF-12 (Library)
 date = datetime.datetime(2022, 1, 15)
+
 df = table_igrf(start_lon, end_lon, step_lon, 
                start_lat, end_lat, step_lat, 
                date = date, 
@@ -117,9 +118,9 @@ df = table_igrf(start_lon, end_lon, step_lon,
 
 CS = ax.contour(df.columns, df.index, df.values, 15, cmap = 'jet')
 
-ax.clabel(CS, CS.levels, inline=True, fontsize=10)
+ax.clabel(CS, CS.levels, inline=True, fontsize = 10)
 
-fontsize = 12
+fontsize = 13
 names, acc, latitudes, longitudes = sites_infos(remove = None)
 
 
@@ -130,18 +131,21 @@ for lat, lon, name in zip(latitudes, longitudes,
             marker = '^', markersize = 10)
     
     if name == 'São José Dos Campos':    
-        ax.text(lon - 1.5, lat - 1.8, name, fontsize = fontsize)
+        ax.text(lon - 2.2, lat - 1.9, name, fontsize = fontsize)
     else:
         offset = 1
         ax.text(lon, lat + offset, name, fontsize = fontsize)
         
-        
-fig.suptitle(f'Sites locations of EMBRACE Magnetometers\n and Horizontal componente (IGRF) - {date.date()}', 
-             y = 0.93)
+
+    
+fig.suptitle(('Sites locations of EMBRACE Magnetometers\n'+
+              f'and Horizontal componente (IGRF) - {date.strftime("%Y/%m/%d")}'), 
+             y = 0.94)
 
 plt.rcParams.update({'font.size': fontsize})   
 
 NameToSave = 'SitesLocationsMagnetometers.png'
+
 save_plot(NameToSave, dpi = 100)
 plt.show()
    

@@ -53,7 +53,7 @@ for ax, num in zip(axs.flat, range(len(acc))):
                            filename)
     
     # Plot Subract from running average 
-    df[component].plot(ax = ax, color = 'k', lw = 1, label = 'data')
+    df[component].plot(ax = ax, color = 'k', lw = 2, label = 'Data')
     df[component].rolling(window = N).mean().plot(ax = ax,
                                                   label = f'running average - {N} min',
                                                   lw= 2, linestyle = ':')
@@ -62,6 +62,7 @@ for ax, num in zip(axs.flat, range(len(acc))):
     ax.text(0.03, 0.8, names[num], 
             transform = ax.transAxes)
     
+    #Remove horizontal lines with exception of top and bottom
     remove_lines(ax, acc, num)
     
     ax.axvspan(tm1, tm2, color='lightgrey', alpha=0.4, lw=0)
@@ -69,7 +70,7 @@ for ax, num in zip(axs.flat, range(len(acc))):
     ax.xaxis.set_major_formatter(dates.DateFormatter('%H'))
     ax.xaxis.set_major_locator(dates.HourLocator(interval = 2))
     
-    ax.set(xlabel = 'Time (hours)')
+    ax.set(xlabel = 'Universal time (UT)')
     
     
 ax.legend(loc = 'center', bbox_to_anchor=(0.5, 10.3), ncol = 2)
@@ -80,16 +81,19 @@ elif component == 'Z(nT)':
 elif component == 'F(nT)':
     ylabel = 'Total'
 
+fontsize = 12
 
-fig.text(-0.01, 0.5, f'Horizontal component (nT)', va='center', 
+fig.text(-0.03, 0.5, f'Horizontal component (nT)', va='center', 
              rotation='vertical', fontsize = fontsize)   
 
-fig.suptitle(f'Hourly variation of\n horizontal component - {tm2.date()}', 
+date = tm1.strftime("%Y/%m/%d")
+
+fig.suptitle(f'Hourly variation of\n horizontal component - {date}', 
              y = 0.97)
 
 plt.rcParams.update({'font.size': 12})    
 
-NameToSave = f'{ylabel}Component{tm1.strftime("%d%m%Y")}AllSites.png'
+NameToSave = f'{ylabel}Component{tm1.strftime("%d%m%Y")}AllSitesVariations.png'
 
 save_plot(NameToSave, dpi = 100)
 plt.show()  

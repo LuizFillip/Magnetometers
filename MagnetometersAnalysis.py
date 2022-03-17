@@ -13,6 +13,7 @@ import datetime
 import matplotlib.dates as dates
 import os
 from pylab import *
+import matplotlib.ticker as ticker
 from astropy.timeseries import LombScargle
 
 
@@ -60,13 +61,18 @@ def running_mean(x, N):
     cumsum = np.cumsum(np.insert(x, 0, 0)) 
     return (cumsum[N:] - cumsum[:-N]) / float(N)
 
+def all_rows_cols(df):
+    with pd.option_context('display.max_rows', None, 
+                           'display.max_columns', None): 
+        print(df)
 
-def plot_LombScargle(ax, t, y, 
+
+def plot_LombScargle(t, y, ax = None, 
                      minimum_period = 0.3, 
                      maximum_period = 2):    
     
     '''
-    Compute and plot the Lomb-Scargle periodogram
+    Compute and plot the Lomb-Scargle periodogram (Astropy library)
     '''
         
     #compute the periodogram and false alarm probability 
@@ -93,11 +99,16 @@ def plot_LombScargle(ax, t, y,
 
 
 
-def plot_Wavelet(ax, df, transform = 'power', 
+def plot_Wavelet(df, ax = None, transform = 'power', 
                  maximum_period = 1.1, minimum_period = 0.1):
     
+    '''
+    Compute and plot wavelet
+    
+    '''
+    
     wavelet_path = 'C:\\Users\\LuizF\\Google Drive\\My Drive\\'\
-    'Python\\code-master\\wavelets-master\\wavelets-master\\wave_python\\'
+    'Python\\code-master\\wavelets-master\\wave_python\\'
     
     sys.path.insert(1, wavelet_path)
     from waveletFunctions import wave_signif, wavelet
@@ -106,7 +117,6 @@ def plot_Wavelet(ax, df, transform = 'power',
     sst = df['dtrend'].values
     time = df['time'].values
     pad = 1
-    sst = sst - np.mean(sst)
     variance = np.std(sst, ddof=1) ** 2
     mother = 'MORLET'
     lag1 = 0.01
@@ -120,46 +130,39 @@ def plot_Wavelet(ax, df, transform = 'power',
     #wavelet transform
     wave, period, scale, coi = wavelet(sst, dt = dt, pad = pad, s0 = s0)
     
+    transform = transform.lower()
+    
+    # Chooice between
     if transform == 'power':
-        # Compute wavelet power spectrum
+        # Compute the power spectrum
         power = (np.abs(wave))**2  
+        
     elif transform == 'phase':
-        # Compute wavelet power spectrum
-        power = np.arctan(np.imag(wave), np.real(wave)) 
+        # Compute the phase
+        power = np.arctan2(np.imag(wave), np.real(wave)) 
     else:
+        # Compute the amplitude
         power = np.real(wave)
         
-    global_ws = (np.sum(power, axis = 1) / n)  # time-average over all times
-    
-    # Significance levels:
-    signif = wave_signif(([variance]), dt=dt, sigtest=0, scale=scale,
-        lag1=lag1, mother=mother)
-    
-    # expand signif --> (J+1)x(N) array
-    sig95 = signif[:, np.newaxis].dot(np.ones(n)[np.newaxis, :])
-    
-    sig95 = power / sig95  # where ratio > 1, power is significant
-         
-    cond = ((period >= minimum_period) & (period <= maximum_period))
+    # Filter the periods
+    condition = ((period >= minimum_period) & (period <= maximum_period))
         
-    ind = np.where(cond)
-    new_period = period[cond]
+    ind = np.where(condition)
+    new_period = period[condition]
     new_power = power[ind, :][0]
-    new_sig95 = sig95[ind, :][0]
-    
+    new_power = new_power / np.max(new_power)
+ 
     time = df.index
+    if ax:
     
-    levels = MaxNLocator(nbins=80).tick_values(new_power.min(), 
-                                               new_power.max())
+        levels = MaxNLocator(nbins=80).tick_values(new_power.min(), 
+                                                   new_power.max())
+        
+        im = ax.contourf(time, new_period, new_power, 
+                         levels = levels, cmap = 'jet')
+        return im
     
-    im = ax.contourf(time, new_period, new_power, 
-                     levels = levels, cmap = 'jet')
-    
-    # 95# significance contour, levels at -99 (fake) and 1 (95# signif)
-    ax.contour(time, new_period, new_sig95, [-99, 1], colors='k')
-    
-
-    return im
+    return time, new_period, new_power, new_sig95
     
 def remove_lines(ax, acc, num):
     
@@ -233,6 +236,11 @@ def datetime_from_foldername_(folder = 'Magnetometer15012022'):
     tm2 = datetime.datetime(year, month, day, 17, 0)
     
 def concat_mag_files(infile, folder):        
+    
+    '''
+    Apply setting dataframe, for data organize, 
+    
+    '''
     
     new_infile = f'{infile}{folder}\\'
     _, _, files = next(os.walk(new_infile))
