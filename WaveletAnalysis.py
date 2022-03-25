@@ -31,8 +31,10 @@ transform = 'amplitude'
 
 nrows = 4
 ncols = 2
-fig, ax = plt.subplots(figsize = (12, 10), sharex = True, sharey = True,
+fig, ax = plt.subplots(figsize = (12, 10), 
+                       sharex = True, sharey = True,
                        nrows = nrows, ncols = ncols)
+
 plt.subplots_adjust(hspace = 0, wspace = 0)
 
 bars = []
@@ -110,13 +112,13 @@ fig.text(0.4, 0.08, 'Time (hours)', va='center',
              rotation='horizontal', fontsize = fontsize)   
 
 
-fig.suptitle(f'Wavelet Analysis - {transform.title()} Spectral - {tm2.date()}', 
+fig.suptitle(f'Wavelet Analysis - {transform.title()} Spectral - {tm2.strftime("%Y/%m/%d")}', 
              y = 0.92)
 
 plt.rcParams.update({'font.size': fontsize})    
 
 
 NameToSave = f'{transform.title()}{tm1.strftime("%d%m%Y")}WaveletNormalized.png'
-#save_plot(NameToSave, dpi = 100)
+save_plot(NameToSave, dpi = 100)
 plt.show()            
 

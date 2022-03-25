@@ -2,7 +2,7 @@
 from MagnetometersAnalysis import *
 ```
 
-<div><img src="INPE-Logo.png" width="100px" align="right"></div>
+<div><img src="Figures/INPE-Logo.png" width="100px" align="right"></div>
 
 # EMBRACE Magnetometers Analysis
 

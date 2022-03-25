@@ -99,11 +99,14 @@ def plot_LombScargle(t, y, ax = None,
 
 
 
-def plot_Wavelet(df, ax = None, transform = 'power', 
-                 maximum_period = 1.1, minimum_period = 0.1):
+def plot_Wavelet(df, ax = None, 
+                 transform = 'power', 
+                 maximum_period = 1.1, 
+                 minimum_period = 0.1):
     
     '''
-    Compute and plot wavelet
+    Compute and plot wavelet analysis
+    software from Torrence and Compo 1998. 
     
     '''
     
