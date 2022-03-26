@@ -3,13 +3,17 @@
 Created on Thu Mar 24 15:39:33 2022
 
 @author: LuizF
+
+Routine for unzip '.gz' files and copy for another directory
+after that remove (delete in temporary path) i need to fix this bug
+latter
 """
 
 import os
 import shutil
-from tqdm import tqdm
-
 import gzip
+
+
 
 
 def unzip(filename, infile, file_out):
@@ -33,7 +37,8 @@ file_out = ("C:\\Users\\LuizF\\Google Drive\\My Drive\\Python\\doctorate-master"
                "\\MagnetometerAnalysis\\Database\\Intermag\\")
 
     
-files = next(os.walk(infile), (None, None, []))[2]
+files = next(os.walk(infile), 
+             (None, None, []))[2]
 
 for filename in files:
     if '.gz' in filename:
