@@ -8,6 +8,7 @@ import os.path
 import sys
 import matplotlib.ticker as ticker
 import matplotlib as mpl
+from pylab import *
 
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
@@ -192,6 +193,8 @@ def plot(files, infile, nrows = 4, ncols = 2, transform = 'power',
     plt.show()            
 
 ## Run
-files = get_filenames_from_codes(infile)
 infile = 'Database/Intermag/'
-plot(files, infile, fontsize = 14)
+
+files = get_filenames_from_codes(infile)
+
+plot(files, infile, fontsize = 14, save = True)

@@ -12,8 +12,7 @@ import numpy as np
 import datetime
 import matplotlib.dates as dates
 import os
-from pylab import *
-import matplotlib.ticker as ticker
+
 from astropy.timeseries import LombScargle
 
 
@@ -99,77 +98,9 @@ def plot_LombScargle(t, y, ax = None,
 
 
 
-def Wavelet(df, ax = None, 
-                 transform = 'power', 
-                 maximum_period = 1.1, 
-                 minimum_period = 0.1):
-    
-    '''
-    Compute and plot wavelet analysis
-    software from Torrence and Compo 1998. 
-    
-    '''
-    
-    wavelet_path = 'C:\\Users\\LuizF\\Google Drive\\My Drive\\'\
-    'Python\\code-master\\wavelets-master\\wave_python\\'
-    
-    sys.path.insert(1, wavelet_path)
-    from waveletFunctions import wave_signif, wavelet
-    
-    dt = 0.016 # sampling time
-    sst = df['dtrend'].values
-    time = df['time'].values
-    pad = 1
-    variance = np.std(sst, ddof=1) ** 2
-    mother = 'MORLET'
-    lag1 = 0.01
-    s0 = 2 * dt  
-    
-    n  = len(sst)
-    if 0:
-        variance = 1.0
-        sst = sst / np.std(sst, ddof=1)
-     
-    #wavelet transform
-    wave, period, scale, coi = wavelet(sst, dt = dt, pad = pad, s0 = s0)
-    
-    transform = transform.lower()
-    
-    # Chooice between
-    if transform == 'power':
-        # Compute the power spectrum
-        power = (np.abs(wave))**2  
-        
-    elif transform == 'phase':
-        # Compute the phase
-        power = np.arctan2(np.imag(wave), np.real(wave)) 
-    else:
-        # Compute the amplitude
-        power = np.real(wave)
-        
-    # Filter the periods
-    condition = ((period >= minimum_period) & (period <= maximum_period))
-        
-    ind = np.where(condition)
-    new_period = period[condition]
-    new_power = power[ind, :][0]
-    new_power = new_power / np.max(new_power)
- 
-    time = df.index
 
     
-    if ax:
-    
-        levels = MaxNLocator(nbins=80).tick_values(new_power.min(), 
-                                                   new_power.max())
-        
-        im = ax.contourf(time, new_period, new_power, 
-                         levels = levels, cmap = 'jet')
-        return im
-    
-    return time, new_period, new_power, new_sig95
-    
-def remove_lines(ax, acc, num):
+def remove_lines(ax, nrows, num):
     
     '''
     Remove inferior and superior lines (spines) from the subplots
@@ -178,7 +109,7 @@ def remove_lines(ax, acc, num):
     '''
     if num == 0:    
         ax.spines['bottom'].set_visible(False)       
-    elif num == (len(acc) - 1):    
+    elif num == (nrows - 1):    
         ax.spines['top'].set_visible(False)
     else:
         ax.spines['top'].set_visible(False)
