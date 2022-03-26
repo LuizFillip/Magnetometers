@@ -100,5 +100,5 @@ plt.rcParams.update({'font.size': 12})
 
 NameToSave = f'{ylabel}{tm1.strftime("%d%m%Y")}dTrendAnalysis.png'
 
-save_plot(NameToSave, dpi = 100)
+#save_plot(NameToSave, dpi = 100)
 plt.show()

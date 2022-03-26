@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar 24 18:49:35 2022
+Created on Thu Mar 24 21:23:21 2022
 
 @author: LuizF
 """
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import matplotlib.dates as dates
+import datetime
 
 import os.path
 import sys
 
 
 
-def find(s, ch):
-    return [i for i, ltr in enumerate(s) if ltr == ch]
-
-
-
-
-
-def get_attrs(infile, save = False):
+class intermagnet:
+    
     '''
     Get some atrributes in DataFrame format (pandas)
     from data INTERMAGNET data files from the Kyoto GIN. 
@@ -28,55 +28,179 @@ def get_attrs(infile, save = False):
     ----------
         Path: String
             Where yours files is it 
-    Returns
+    Methods
     -------
-        Defoult Station Name, IAGA CODE, Latitude and Longitude
+        dataframe: Pandas Datraframe (datetime index and components only)
     '''
     
+    def __init__(self, filename, infile):
+        
+        self.filename = filename
+        self.infile = infile
+       
+        with open(self.infile + self.filename) as f:
+            self.all_data = [line.strip() for line in f.readlines()]
+  
+        self.count = 0
+        for num in range(len(self.all_data)):
+            if ('DATE' or 'TIME') in self.all_data[num]:
+                break
+            else:
+                self.count += 1
+                
+    def replace_char(self, text):
+        
+        """
+        Replace, with an loop, string from a text
+        """
+        self.text = text
     
-    infos_extracted = []
+        for ch in ['|', 'Station Name', 'Station', 
+                   'IAGA CODE', 'IAGA Code', 
+                   'Geodetic Latitude', 
+                   'Geodetic Longitude',
+                   'Reported']:
+            
+            if ch in self.text:
+                self.text = self.text.replace(ch,'').strip()
+                
+        return self.text
+    
+    def find(self, s, ch):
+        return [i for i, ltr in enumerate(s) if ltr == ch]
+            
+    @property        
+    def report(self):
+        return self.replace_char(self.all_data[7])
+    
+    @property        
+    def code(self):
+        "Acronym for the station name"
+        return self.filename[:3]
+    
+    @property        
+    def date(self):
+        self.year = int(self.filename[3:7])
+        self.month = int(self.filename[7:9])
+        self.day = int(self.filename[9:11])
+        return datetime.datetime(self.year, self.month, self.day)
+
+    @property        
+    def name(self):
+        return self.replace_char(self.all_data[2])
+    
+    @property 
+    def header(self):
+        return self.count
+    
+    @property 
+    def latitude(self):
+        return float(self.replace_char(self.all_data[4]))
+    
+    @property 
+    def longitude(self):
+        self.lon = float(self.replace_char(self.all_data[5]))
+        
+        if self.lon > 180:
+               self.lon = (-360 + self.lon)
+               
+        return self.lon
+    
+    
+    def dataframe(self, component = 'H',
+                  N = 10):
+        
+        # Read csv data files
+        self.df = pd.read_csv(self.infile + self.filename, 
+                         delim_whitespace = True, header = self.header)
+        
+        # Setting index in datetime format
+        self.df.index = pd.to_datetime(self.df['DATE'] + ' ' + self.df['TIME'], 
+                                  infer_datetime_format = True)
+        
+        self.df = self.df.drop(columns = ['DATE', 'TIME', 'DOY', '|'])
+        
+        # Get code file (acronym for the station name)
+        code = self.code.upper()
+        
+        self.df['time'] = self.df.index.hour + (self.df.index.minute / 60)
+        
+        
+        
+        if self.report == 'XYZF':
+            
+            columns = {f'{code}X': "X", f'{code}Y': "Y", 
+                       f'{code}Z': "Z", f'{code}F': "F"}
+            self.df.rename(columns = columns, inplace = True)
+            
+            # Compute the horizontal component (Kirchoff)
+            self.df['H'] = np.sqrt(self.df['X']**2 + 
+                                          self.df['X']**2)
+            
+        else:
+            columns = {f"{code}H": "H", f"{code}D": "D", 
+                       f"{code}Z": "Z", f"{code}F": "F"}
+            
+            self.df.rename(columns = columns, inplace = True)
+           
+        
+        
+        if component:
+            # Compute dtrend
+            self.df['dtrend'] = (self.df[component] - 
+                                 self.df[component].rolling(window = 
+                                                                 N).mean())
+            
+            self.df = self.df.dropna()    
+        
+        
+        self.df.index.name = self.name
+        
+        return self.df
+
+def get_filenames_from_codes(infile, sts = ['Pilar', 'Tatuoca',
+                                    'Guimar - Tenerife', 'San Fernando',
+                                    'Eskdalemuir', 'Lerwick', 
+                                    'Hartland', 'Hornsund']):
+    
+    '''
+    Find files by their code or station name (parameter: sts)
+    After cross related with the directory for to get the filenames
+    '''
+    
+    df = pd.read_csv('Database/StationsCoords.txt', 
+                     delimiter=',')
+    
+    find_sts = df.loc[df['Station'].isin(sts)].sort_values(by=['Lat'])
+    
+    result = []
     
     _, _, files = next(os.walk(infile))
+   
     
-    for filename in files:
-        
-        if 'min' in filename:
-            
-            # Read the files like string text
-            with open(infile + filename) as f:
-                header = f.read()
-            
-            # Find all indexes thats contain '/' 
-            # (with separate the informations)
-            idx = find(header, '|')
-            
-            # Use the indexes above for get the main 
-            # informations
-            name = replace_char(header[idx[1]: idx[2]])
-            code = replace_char(header[idx[2]: idx[3]])
-            
-            # Convert the latitude and longitude 
-            # into numeric format (float)
-            lat = float(replace_char(header[idx[3]: idx[4]]))
-            lon = float(replace_char(header[idx[4]: idx[5]]))
-            
-            # COndition for longitude
-            if lon > 180:
-                lon = (-360 + lon)
-     
-            infos_extracted.append([name, code, lat, lon])
-            
-    # Join the results in the DataFrame
-    df = pd.DataFrame(infos_extracted, 
-                      columns = ['Station', 'Code', 'Lat', 'Lon'])
+    for code in find_sts['Code'].values:
+        for filename in files:   
+            if code.lower() == filename[:3]:
+                result.append(filename)
     
-    if save: 
-        # If want the save
-        df.to_csv(infile.replace('Intermag/', 'StationsCoords.txt')) 
-    else:
-        return df    
-    
-infile = 'Database/Intermag/'
+    return result
 
     
-#get_attrs(infile)
+    
+'''
+for filename in get_filenames_from_codes('Database/Intermag/'):
+
+    instance_ = intermagnet(filename, infile)
+                
+    df = instance_.dataframe(component = 'H') 
+    print(df.head())instance_ = intermagnet(filename, infile)
+            
+df = instance_.dataframe(component = 'H') 
+print(df.head())
+
+
+'''
+
+
+
+

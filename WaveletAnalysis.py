@@ -7,118 +7,191 @@ Created on Mon Mar 14 10:23:32 2022
 import os.path
 import sys
 import matplotlib.ticker as ticker
-
+import matplotlib as mpl
 
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 
-from MagnetometersAnalysis import *
+#from MagnetometersAnalysis import *
+from Intermagnet import *
 
 
-infile = 'G:\\My Drive\\Python\\doctorate-master\\'\
-        'MagnetometerAnalysis\\Database\\'
-        
-folder = 'Magnetometer15012022\\'
-
-names, acc, lat, lon = sites_infos()
-
-tm1 = datetime.datetime(2022, 1, 15, 13, 0)
-tm2 = datetime.datetime(2022, 1, 15, 19, 0)
-
-component = 'H(nT)'
-transform = 'amplitude'
-
-
-nrows = 4
-ncols = 2
-fig, ax = plt.subplots(figsize = (12, 10), 
-                       sharex = True, sharey = True,
-                       nrows = nrows, ncols = ncols)
-
-plt.subplots_adjust(hspace = 0, wspace = 0)
-
-bars = []
-
-for x in range(nrows):
-    for y in range(ncols):
-        
-        num = ((x + 1) * (y + 1)) - 1
-        filename = f'{acc[num]}15jan.22m'
+def Wavelet(df, ax = None, 
+                 transform = 'power', 
+                 maximum_period = 1.1, 
+                 minimum_period = 0.1):
     
-        # Read the files
-        df = setting_dataframe(infile + folder, 
-                           filename, component = component)
+    '''
+    Compute and plot wavelet analysis
+    software from Torrence and Compo 1998. 
+    
+    '''
+    
+    wavelet_path = 'C:\\Users\\LuizF\\Google Drive\\My Drive\\'\
+    'Python\\code-master\\wavelets-master\\wave_python\\'
+    
+    sys.path.insert(1, wavelet_path)
+    from waveletFunctions import wave_signif, wavelet
+    
+    dt = 0.016 # sampling time (1 minute)
+    sst = df['dtrend'].values
+    time = df['time'].values
+    pad = 1
+    variance = np.std(sst, ddof=1) ** 2
+    mother = 'MORLET'
+    lag1 = 0.01
+    s0 = 2 * dt  
+    
+    n  = len(sst)
+    if 0:
+        variance = 1.0
+        sst = sst / np.std(sst, ddof=1)
+     
+    #wavelet transform
+    wave, period, scale, coi = wavelet(sst, dt = dt, pad = pad, s0 = s0)
+    
+    transform = transform.lower()
+    
+    # Chooice between
+    if transform == 'power':
+        # Compute the power spectrum
+        power = (np.abs(wave))**2  
         
-        im = plot_Wavelet(df, ax[x, y], transform = transform)
+    elif transform == 'phase':
+        # Compute the phase
+        power = np.arctan2(np.imag(wave), np.real(wave)) 
+    else:
+        # Compute the amplitude
+        power = np.real(wave)
         
-        #bars.append(im.get_array())
+    # Filter the periods
+    condition = ((period >= minimum_period) & (period <= maximum_period))
         
-        ax[x, y].text(0.03, 0.89, names[num], transform = ax[x, y].transAxes)
+    ind = np.where(condition)
+    new_period = period[condition]
+    new_power = power[ind, :][0]
+    new_power = new_power / np.max(new_power)
+ 
+    time = df.index
+
+    
+    if ax:
+    
+        levels = MaxNLocator(nbins=80).tick_values(new_power.min(), 
+                                                   new_power.max())
         
-        delta = datetime.timedelta(minutes = 30)
+        im = ax.contourf(time, new_period, new_power, 
+                         levels = levels, cmap = 'jet')
+        return im
+    
+    return time, new_period, new_power, new_sig95
+
         
-        ax[x, y].set(ylim = [0, 1.3], 
-                    xlim = [df.index[0] - delta, df.index[-1] + delta],
-                     yticks = np.arange(0, 1.2, 0.2))
-        
-        ax[x, y].xaxis.set_major_formatter(dates.DateFormatter('%H'))   
-        ax[x, y].xaxis.set_major_locator(dates.HourLocator(interval = 2))
-        
-        if y == 0:
-            ax[x, y].spines['right'].set_visible(False)
-            if x == 0: 
-                ax[x, y].spines['bottom'].set_visible(False)
-            elif x == (nrows - 1):
-                ax[x, y].spines['top'].set_visible(False)   
-            else:
-                ax[x, y].spines['top'].set_visible(False)   
-                ax[x, y].spines['bottom'].set_visible(False)  
-                
-        else:
-            ax[x, y].spines['left'].set_visible(False)
-            if x == 0: 
-                ax[x, y].spines['bottom'].set_visible(False)
-                ax[x, y].axes.yaxis.set_visible(False)
-            elif x == (nrows - 1):
-                ax[x, y].spines['top'].set_visible(False)   
-                ax[x, y].axes.yaxis.set_visible(False)
-            else:
-                ax[x, y].spines['top'].set_visible(False)   
-                ax[x, y].spines['bottom'].set_visible(False)  
-                ax[x, y].axes.yaxis.set_visible(False)
+def plot(files, infile, nrows = 4, ncols = 2, transform = 'power', 
+         component = 'H', fontsize = 14, save = False):
+    
+    fig, ax = plt.subplots(figsize = (12, 10), 
+                           sharex = True, sharey = True,
+                           nrows = nrows, ncols = ncols)
+    
+    plt.subplots_adjust(hspace = 0, wspace = 0)
+    
+    
+    for x in range(nrows):
+        for y in range(ncols):
             
-        
-fontsize = 14
-
-import matplotlib as mpl
-
-
-cax, kw = mpl.colorbar.make_axes([axes for axes in ax.flat])
-
-if transform == 'power':    
-    vmin, vmax = 0, 1
-else:
-    vmin, vmax = -1, 1
+            num = ((x + 1) * (y + 1)) - 1
+            
     
-cbar = fig.colorbar(im, cax=cax, **kw, 
-                    ticks = np.arange(vmin, vmax + 0.1, 0.1))
+            filename = files[num]
+            
+            # Read the files
+            instance_ = intermagnet(filename, infile)
+            
+            df = instance_.dataframe(component = component)
+            
+           
+            im = Wavelet(df, ax[x, y], transform = transform)
+            
+ 
+            ax[x, y].text(0.03, 0.89, instance_.name, 
+                          transform = ax[x, y].transAxes)
+            
+            deltatime = datetime.timedelta(minutes = 30)
+            
+            ax[x, y].set(ylim = [0, 1.3], 
+                        xlim = [df.index[0] - deltatime, 
+                                df.index[-1] + deltatime],
+                         yticks = np.arange(0, 1.2, 0.2))
+            
+            ax[x, y].xaxis.set_major_formatter(dates.DateFormatter('%H'))   
+            ax[x, y].xaxis.set_major_locator(dates.HourLocator(interval = 2))
+            
+            if y == 0:
+                ax[x, y].spines['right'].set_visible(False)
+                if x == 0: 
+                    ax[x, y].spines['bottom'].set_visible(False)
+                elif x == (nrows - 1):
+                    ax[x, y].spines['top'].set_visible(False)   
+                else:
+                    ax[x, y].spines['top'].set_visible(False)   
+                    ax[x, y].spines['bottom'].set_visible(False)  
+                    
+            else:
+                ax[x, y].spines['left'].set_visible(False)
+                if x == 0: 
+                    ax[x, y].spines['bottom'].set_visible(False)
+                    ax[x, y].axes.yaxis.set_visible(False)
+                elif x == (nrows - 1):
+                    ax[x, y].spines['top'].set_visible(False)   
+                    ax[x, y].axes.yaxis.set_visible(False)
+                else:
+                    ax[x, y].spines['top'].set_visible(False)   
+                    ax[x, y].spines['bottom'].set_visible(False)  
+                    ax[x, y].axes.yaxis.set_visible(False)
+ 
+    cax, kw = mpl.colorbar.make_axes([axes for axes in ax.flat])
+    
+    if transform == 'power':    
+        vmin, vmax, step = 0, 1, 0.1
+    else:
+        vmin, vmax, step = -1, 1, 0.1
+        
+    cbar = fig.colorbar(im, cax=cax, **kw, 
+                        ticks = np.arange(vmin, vmax + step, step))
+    
+    cbar.set_label(f'{transform.title()} Spectral Density (normalized)')
+    
+    fig.text(0.07, 0.5, 'Period (hours)', va='center', 
+                 rotation='vertical', fontsize = fontsize)   
+    
+    fig.text(0.4, 0.08, 'Universal time (UT)', va='center', 
+                 rotation='horizontal', fontsize = fontsize) 
+    
+    # Datetime format
+    def date(format_ = "%d/%m/%Y"):
+        return instance_.date.strftime(format_)
+    
+    fig.suptitle(f'Wavelet Analysis - {transform.title()} Spectral - {date()}', 
+                 y = 0.9, fontsize = fontsize)
+    
+    plt.rcParams.update({'font.size': fontsize})    
+    
+    
+    
+    if save:
+          
+        NameToSave = f'{transform.title()}WaveletAnalysis{date(format_ = "%d%m%Y")}.png'
+        
+        path_to_save = 'Figures/INTERMAGNET/'
+    
+        plt.savefig(path_to_save + NameToSave, 
+                    dpi = 100, bbox_inches="tight")
+    
+    
+    plt.show()            
 
-cbar.set_label(f'{transform.title()} Spectral Density (normalized)')
-
-fig.text(0.07, 0.5, 'Period (hours)', va='center', 
-             rotation='vertical', fontsize = fontsize)   
-
-fig.text(0.4, 0.08, 'Time (hours)', va='center', 
-             rotation='horizontal', fontsize = fontsize)   
-
-
-fig.suptitle(f'Wavelet Analysis - {transform.title()} Spectral - {tm2.strftime("%Y/%m/%d")}', 
-             y = 0.92)
-
-plt.rcParams.update({'font.size': fontsize})    
-
-
-NameToSave = f'{transform.title()}{tm1.strftime("%d%m%Y")}WaveletNormalized.png'
-save_plot(NameToSave, dpi = 100)
-plt.show()            
-
+## Run
+files = get_filenames_from_codes(infile)
+infile = 'Database/Intermag/'
+plot(files, infile, fontsize = 14)

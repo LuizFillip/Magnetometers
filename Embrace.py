@@ -99,7 +99,7 @@ def plot_LombScargle(t, y, ax = None,
 
 
 
-def plot_Wavelet(df, ax = None, 
+def Wavelet(df, ax = None, 
                  transform = 'power', 
                  maximum_period = 1.1, 
                  minimum_period = 0.1):
@@ -156,6 +156,8 @@ def plot_Wavelet(df, ax = None,
     new_power = new_power / np.max(new_power)
  
     time = df.index
+
+    
     if ax:
     
         levels = MaxNLocator(nbins=80).tick_values(new_power.min(), 
