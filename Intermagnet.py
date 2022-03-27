@@ -106,8 +106,8 @@ class intermagnet:
                
         return self.lon
     
-    
-    def dataframe(self, dtrend = True, component = 'H'):
+    @property
+    def dataframe(self):
         
         # Read csv data files
         self.df = pd.read_csv(self.infile + self.filename, 
@@ -142,18 +142,22 @@ class intermagnet:
             
             self.df['X'] = self.df['H'] * np.cos(np.deg2rad(self.df['D']))
             
-        if dtrend == True:
-            # Compute dtrend
-            self.df['dtrend'] = (self.df[component] - 
-                                 self.df[component].rolling(window = 
-                                                                 10).mean())
-            self.df['time'] = self.df.index.hour + (self.df.index.minute / 60)
-            self.df = self.df.dropna()    
-        
-        
-        self.df.index.name = self.name
-        
-        return self.df
+            
+            self.df.index.name = self.name
+        return self. df
+            
+def dtrend(df, component = 'H', limit = 200):
+    
+    "Compute dtrend (Remove the runnig average with 10 minutes)"
+    
+    df['dtrend'] = (df[component] - df[component].rolling(window = 10).mean())
+    df['time'] = df.index.hour + (df.index.minute / 60)
+    
+    if limit:
+        df.dtrend = df.dtrend.where(df.dtrend.between(-limit, limit))
+    
+    df = df.dropna()    
+    return df
 
 def get_filenames_from_codes(infile, sts = ['Pilar', 'Tatuoca',
                                     'Guimar - Tenerife', 'San Fernando',
@@ -182,17 +186,12 @@ def get_filenames_from_codes(infile, sts = ['Pilar', 'Tatuoca',
     
     return result
 
-'''
 
-
-    
 
 files = get_filenames_from_codes('Database/Intermag/')
 
 filename = files[0]
 
-instance_ = intermagnet(filename, infile)
-df = instance_.dataframe(dtrend=True, component = 'X')
+instance_ = intermagnet(filename, 'Database/Intermag/')
+df = dtrend(instance_.dataframe, component = 'X')
 print(df)
-
-'''
