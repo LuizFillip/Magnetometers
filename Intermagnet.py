@@ -107,8 +107,7 @@ class intermagnet:
         return self.lon
     
     
-    def dataframe(self, component = 'H',
-                  N = 10):
+    def dataframe(self, dtrend = True, component = 'H'):
         
         # Read csv data files
         self.df = pd.read_csv(self.infile + self.filename, 
@@ -122,10 +121,7 @@ class intermagnet:
         
         # Get code file (acronym for the station name)
         code = self.code.upper()
-        
-        self.df['time'] = self.df.index.hour + (self.df.index.minute / 60)
-        
-        
+            
         
         if self.report == 'XYZF':
             
@@ -134,23 +130,24 @@ class intermagnet:
             self.df.rename(columns = columns, inplace = True)
             
             # Compute the horizontal component (Kirchoff)
-            self.df['H'] = np.sqrt(self.df['X']**2 + 
-                                          self.df['X']**2)
+            self.df['H'] = np.sqrt(self.df['X']**2 + self.df['X']**2)
             
         else:
             columns = {f"{code}H": "H", f"{code}D": "D", 
                        f"{code}Z": "Z", f"{code}F": "F"}
             
             self.df.rename(columns = columns, inplace = True)
-           
-        
-        
-        if component:
+            
+            self.df['Y'] = self.df['H'] * np.sin(np.deg2rad(self.df['D']))
+            
+            self.df['X'] = self.df['H'] * np.cos(np.deg2rad(self.df['D']))
+            
+        if dtrend == True:
             # Compute dtrend
             self.df['dtrend'] = (self.df[component] - 
                                  self.df[component].rolling(window = 
-                                                                 N).mean())
-            
+                                                                 10).mean())
+            self.df['time'] = self.df.index.hour + (self.df.index.minute / 60)
             self.df = self.df.dropna()    
         
         
@@ -185,22 +182,17 @@ def get_filenames_from_codes(infile, sts = ['Pilar', 'Tatuoca',
     
     return result
 
-    
-    
-'''
-for filename in get_filenames_from_codes('Database/Intermag/'):
-
-    instance_ = intermagnet(filename, infile)
-                
-    df = instance_.dataframe(component = 'H') 
-    print(df.head())instance_ = intermagnet(filename, infile)
-            
-df = instance_.dataframe(component = 'H') 
-print(df.head())
-
-
 '''
 
 
+    
 
+files = get_filenames_from_codes('Database/Intermag/')
 
+filename = files[0]
+
+instance_ = intermagnet(filename, infile)
+df = instance_.dataframe(dtrend=True, component = 'X')
+print(df)
+
+'''
