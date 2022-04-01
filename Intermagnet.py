@@ -26,8 +26,8 @@ class intermagnet:
     
     Parameters
     ----------
-        Path: String
-            Where yours files is it 
+        Infile: String
+           Path of direcotry where the files is it 
     Methods
     -------
         dataframe: Pandas Datraframe (datetime index and components only)
@@ -160,9 +160,9 @@ def dtrend(df, component = 'H', limit = 200):
     return df
 
 def get_filenames_from_codes(infile, sts = ['Pilar', 'Tatuoca',
-                                    'Guimar - Tenerife', 'San Fernando',
-                                    'Eskdalemuir', 'Lerwick', 
-                                    'Hartland', 'Hornsund']):
+                                            'Guimar - Tenerife', 'San Fernando',
+                                            'Eskdalemuir', 'Lerwick', 
+                                            'Hartland', 'Hornsund']):
     
     '''
     Find files by their code or station name (parameter: sts)
@@ -187,11 +187,11 @@ def get_filenames_from_codes(infile, sts = ['Pilar', 'Tatuoca',
     return result
 
 
-
-files = get_filenames_from_codes('Database/Intermag/')
-
-filename = files[0]
-
-instance_ = intermagnet(filename, 'Database/Intermag/')
-df = dtrend(instance_.dataframe, component = 'X')
-print(df)
+def main():
+    files = get_filenames_from_codes('Database/Intermag/')
+    
+    filename = files[0]
+    
+    instance_ = intermagnet(filename, 'Database/Intermag/')
+    df = dtrend(instance_.dataframe, component = 'X')
+    print(df)

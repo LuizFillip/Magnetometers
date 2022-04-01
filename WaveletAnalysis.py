@@ -192,9 +192,9 @@ def plot(files, infile, nrows = 4, ncols = 2, transform = 'power',
     
     plt.show()            
 
-## Run
-infile = 'Database/Intermag/'
+### Run
+#infile = 'Database/Intermag/'
 
-files = get_filenames_from_codes(infile)
+#files = get_filenames_from_codes(infile)
 
-plot(files, infile, fontsize = 14, save = True)
+#(files, infile, fontsize = 14, save = True)

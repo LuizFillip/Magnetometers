@@ -16,7 +16,7 @@ infile = 'G:\\My Drive\\Python\\doctorate-master\\MagnetometerAnalysis\\Database
 
 filename = 'Dst_012022.txt'
 
-df = pd.read_csv(infile + filename, delim_whitespace = True, header= 17)
+df = pd.read_csv(infile + filename, delim_whitespace = True, header = 17)
 
 df.index = pd.to_datetime(df['DATE'] + ' ' + df['TIME'], 
                           errors  = 'coerce')
@@ -64,6 +64,6 @@ ax[1].set(xlabel = 'hours', ylabel = 'Dst index (nT)')
 plt.rcParams.update({'font.size': 12})    
 
 NameToSave = f'DstIndexJanuary2022.png'
-save_plot(NameToSave, dpi = 100)
+
 
 plt.show()

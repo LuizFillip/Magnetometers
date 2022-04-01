@@ -115,6 +115,8 @@ def remove_lines(ax, nrows, num):
         ax.spines['top'].set_visible(False)
         ax.spines['bottom'].set_visible(False)
         
+        
+        
 def sites_infos(remove = (3, 5)):
     
     '''
