@@ -168,8 +168,9 @@ def get_filenames_from_codes(infile, sts = ['Pilar', 'Tatuoca',
     Find files by their code or station name (parameter: sts)
     After cross related with the directory for to get the filenames
     '''
-    
-    df = pd.read_csv('Database/StationsCoords.txt', 
+    path_all_files = ('C:/Users/LuizF/Google Drive/My Drive/Python/doctorate-master' +
+    '/MagnetometerAnalysis/Database/IntermagnetLocations.txt')
+    df = pd.read_csv(path_all_files, 
                      delimiter=',')
     
     find_sts = df.loc[df['Station'].isin(sts)].sort_values(by=['Lat'])
@@ -195,3 +196,4 @@ def main():
     instance_ = intermagnet(filename, 'Database/Intermag/')
     df = dtrend(instance_.dataframe, component = 'X')
     print(df)
+

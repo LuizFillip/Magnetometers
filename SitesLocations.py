@@ -81,7 +81,7 @@ def Plot_from_files(fig, ax, files, infile, dip = True,
         longitudes.append(lon)
         latitudes.append(lat)
         # Plot locations sites
-        ax.plot(lon, lat, 'o', color = 'red', 
+        ax.plot(lon, lat, 'o', color = 'red', label = 'INTERMAGNET Mag.',
                 marker = 's', markersize = fontsize)
         
         offset = 1
@@ -130,36 +130,39 @@ def Plot_from_files(fig, ax, files, infile, dip = True,
   
     plt.show()
    
-start_lat, end_lat = -60, 5 #-60, 10
-start_lon, end_lon = -75, -30 #-80, -30
-step_lat, step_lon = 5, 5
 
-    
-fig, ax = features_of_map(start_lon, end_lon, step_lon, 
-                        start_lat, end_lat, step_lat)   
 
-def Plot_EMBRACE(fig, ax): 
+def Plot_EMBRACE(fig, ax, fontsize = 14): 
     
     names, acronym, lat, lon = sites_infos(remove = (3, 5))
     
  
-    fontsize = 14
+    
    #infile = 'MagnetometerAnalysis/Database/EmbraceLocations.txt'
 
     for num in range(len(names)):
         ax.plot(lon[num], lat[num], 
-                color = 'red', 
+                color = 'red', label = 'EMBRACE Mag.', 
                 marker = '^', markersize = fontsize)
          
         offset = 1
         ax.text(lon[num], lat[num] + offset, 
                 names[num], fontsize = fontsize)
         
-        
-Plot_EMBRACE(fig, ax)
-
-files_intermagnet = ['pil20220115pmin.min.txt', 
+def main():    
+    
+    start_lat, end_lat = -60, 5 #-60, 10
+    start_lon, end_lon = -75, -30 #-80, -30
+    step_lat, step_lon = 5, 5
+    
+    
+    fig, ax = features_of_map(start_lon, end_lon, step_lon, 
+                        start_lat, end_lat, step_lat)   
+    Plot_EMBRACE(fig, ax)
+    
+    files_intermagnet = ['pil20220115pmin.min.txt', 
                     'ttb20220115qmin.min']
-
-Plot_from_files(fig, ax, files_intermagnet, 'Database/Intermag/', 
+    
+    Plot_from_files(fig, ax, files_intermagnet, 'MagnetometerAnalysis/Database/Intermag/', 
                 dip = True, fontsize = 14, save = False)
+    

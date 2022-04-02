@@ -95,25 +95,6 @@ def plot_LombScargle(t, y, ax = None,
         
     return period, power
 
-
-
-
-
-    
-def remove_lines(ax, nrows, num):
-    
-    '''
-    Remove inferior and superior lines (spines) from the subplots
-    with the exception the firt (must have the top spine)
-    and the last one, must have the bottom, only. 
-    '''
-    if num == 0:    
-        ax.spines['bottom'].set_visible(False)       
-    elif num == (nrows - 1):    
-        ax.spines['top'].set_visible(False)
-    else:
-        ax.spines['top'].set_visible(False)
-        ax.spines['bottom'].set_visible(False)
         
         
         
@@ -135,6 +116,8 @@ def sites_infos(remove = (3, 5)):
                     ['Araguatins', 'ara', -5.65, -48.12], 
                     ['Eusébio', 'eus',  -3.89, -38.45], 
                     ['São Luis', 'slz', -2.53, -44.30]])
+    
+    
       
     if remove is not None:
         sites = np.delete(sites, remove, axis = 0)

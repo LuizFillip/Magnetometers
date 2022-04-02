@@ -29,7 +29,7 @@ def SequentialPlot(files, infile, figsize = (6, 10), save = False,
     plt.subplots_adjust(hspace = 0)
     
     
-    for ax, num in zip(axs.flat, range(nrows)):
+    for num, ax in enumerate(axs.flat):
         
         instance_ = intermagnet(files[num], infile)
         
