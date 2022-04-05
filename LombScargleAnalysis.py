@@ -66,9 +66,6 @@ for ax, num in zip(axs.flat, range(len(acc))):
 
 avg_period = np.array(list(best_period.values())).mean()
 
-print(best_period)
-print(avg_period)
-
 
 ax.legend(loc = 'center', bbox_to_anchor=(0.5, 8.2), ncol = 2)
 

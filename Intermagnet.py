@@ -197,3 +197,9 @@ def main():
     df = dtrend(instance_.dataframe, component = 'X')
     print(df)
 
+files = ['hua20220115vmin.min.txt', 
+         'ttb20220115qmin.min', 'ipm20220115vmin.min.txt']
+
+for filename in files:
+    x = intermagnet(filename, 'MagnetometerAnalysis/Database/Intermag/')
+    print(f'[{x.name}, {x.code}, {x.latitude}, {x.longitude}],')

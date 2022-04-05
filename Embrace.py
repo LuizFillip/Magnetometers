@@ -98,39 +98,52 @@ def plot_LombScargle(t, y, ax = None,
         
         
         
-def sites_infos(remove = (3, 5)):
+class sites_embrace:
     
     '''
     Array with informations about the EMBRACE magnetormetors 
     sites. This array content the name of the city, acromic
     
     '''
-
-    sites = np.array([['Rio Grande', 'rga', -53.78, -67.70],
-                    ['São Martinho da Serra', 'sms', -29.53,-53.85], 
-                    ['Tucumán', 'tcm', -26.56, -64.88], 
-                    ['São José Dos Campos', 'sjc', -23.19, -45.89], 
-                    ['Vassouras', 'vss', -22.41, -43.66],
-                    ['Jataí', 'jat', -17.88, -51.72], 
-                    ['Cuiabá', 'cba', -15.60, -56.10], 
-                    ['Araguatins', 'ara', -5.65, -48.12], 
-                    ['Eusébio', 'eus',  -3.89, -38.45], 
-                    ['São Luis', 'slz', -2.53, -44.30]])
+    def __init__(self, filename = None):
+        
+        self.infos_ = np.array([['Rio Grande', 'rga', -53.78, -67.70],
+                        ['São Martinho da Serra', 'sms', -29.53,-53.85], 
+                        ['Tucumán', 'tcm', -26.56, -64.88], 
+                        ['São José Dos Campos', 'sjc', -23.19, -45.89], 
+                        ['Vassouras', 'vss', -22.41, -43.66],
+                        ['Jataí', 'jat', -17.88, -51.72], 
+                        ['Cuiabá', 'cba', -15.60, -56.10], 
+                        ['Araguatins', 'ara', -5.65, -48.12], 
+                        ['Eusébio', 'eus',  -3.89, -38.45], 
+                        ['São Luis', 'slz', -2.53, -44.30],
+                        ["Pilar", "pil", -31.7, -63.89],
+                        ["Tatuoca", "ttb", -1.205, -48.51]])
     
     
       
-    if remove is not None:
-        sites = np.delete(sites, remove, axis = 0)
+        if filename is not None:
+            self.acc = filename
+           
+            self.cond = self.infos_[(self.infos_[:, 1] == 
+                                     self.acc[:3])][0]
         
-    sites = sites[::-1] #inverse order from high latitudes to lower
+    @property
+    def infos(self):
+        return self.cond
     
-    #get informations
-    names = sites[:, 0]
-    acronym = sites[:, 1]
-    latitudes = pd.to_numeric(sites[:, 2])
-    longitudes = pd.to_numeric(sites[:, 3])
-    
-    return names, acronym, latitudes, longitudes
+    @property
+    def sites_names(self):
+        return self.infos_[:, 0]
+    @property
+    def acronyms(self):
+        return self.infos_[:, 1]
+    @property
+    def latitudes(self):
+        return pd.to_numeric(self.infos_[:, 2])
+    @property
+    def longitudes(self):
+        return pd.to_numeric(self.infos_[:, 3]) 
 
 def save_plot(NameToSave, dpi = 100):
     
@@ -144,17 +157,7 @@ def save_plot(NameToSave, dpi = 100):
     plt.savefig(path_to_save + NameToSave, 
                 dpi = dpi, bbox_inches="tight")
     
-def datetime_from_foldername_(folder = 'Magnetometer15012022'):
-    
-    fmtdate = folder.replace('Magnetometer', '')
-    
-    day = int(fmtdate[:2])
-    month = int(fmtdate[2:4])
-    year = int(fmtdate[4:])
-    
-    # Select area for to shade (analysis)
-    tm1 = datetime.datetime(year, month, day, 13, 0)
-    tm2 = datetime.datetime(year, month, day, 17, 0)
+
     
 def concat_mag_files(infile, folder):        
     
