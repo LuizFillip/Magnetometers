@@ -24,7 +24,7 @@ def features_of_map(start_lon, end_lon, step_lon,
     ax = plt.axes(projection = ccrs.PlateCarree())
 
     '''
-    Routine for plot cartoy map with all specifications
+    Routine for plot cartoy map with all mapping specifications
     only declaring the beginnig and ending of latitudes
     and longitudes (and yours steps). 
     

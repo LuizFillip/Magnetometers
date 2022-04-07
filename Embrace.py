@@ -98,12 +98,19 @@ def plot_LombScargle(t, y, ax = None,
         
         
         
-class sites_embrace:
+class sites_mag:
     
     '''
     Array with informations about the EMBRACE magnetormetors 
     sites. This array content the name of the city, acromic
     
+    Parameters
+    ----------
+        Filename: Name of the file (for while, the files must be
+                                    in the south america region)
+    Methods
+    -------
+        infos: list (all informations)
     '''
     def __init__(self, filename = None):
         
@@ -119,8 +126,7 @@ class sites_embrace:
                         ['São Luis', 'slz', -2.53, -44.30],
                         ["Pilar", "pil", -31.7, -63.89],
                         ["Tatuoca", "ttb", -1.205, -48.51]])
-    
-    
+
       
         if filename is not None:
             self.acc = filename
@@ -131,6 +137,19 @@ class sites_embrace:
     @property
     def infos(self):
         return self.cond
+    
+    @property
+    def name(self):
+        return self.cond[0]
+    @property
+    def acronyms(self):
+        return self.cond[1]
+    @property
+    def latitude(self):
+        return self.cond[2]
+    @property
+    def longitude(self):
+        return self.cond[3]
     
     @property
     def sites_names(self):
@@ -162,17 +181,16 @@ def save_plot(NameToSave, dpi = 100):
 def concat_mag_files(infile, folder):        
     
     '''
-    Apply setting dataframe, for data organize, 
-    
+    Concatenate all files in directory and
+    apply setting_dataframe each other, for compose 
+    a single 
     '''
     
     new_infile = f'{infile}{folder}\\'
     _, _, files = next(os.walk(new_infile))
     
-    join = [setting_dataframe(new_infile, filename) for 
-            filename in files[::-1]]
-    
-    return pd.concat(join)
+    return pd.concat([setting_dataframe(new_infile, filename) for 
+            filename in files[::-1]])
 
 def change_color_axes(ax, color = 'red', position = 'left'):
     '''
