@@ -1,22 +1,15 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Mar  5 19:55:27 2022
-
-@author: LuizF
-"""
-
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import datetime
+import datetime as dt
 import matplotlib.dates as dates
 import os
 
 from astropy.timeseries import LombScargle
 
 
-def setting_dataframe(infile, filename, component = 'H(nT)', N = 10):
+def setting_dataframe(infile, component = 'H(nT)', N = 10):
     """
     Function for to organize magnetormeters data from EMBRACE (INPE).
     Here, returns dTrend array from the component desired with the 
@@ -27,7 +20,7 @@ def setting_dataframe(infile, filename, component = 'H(nT)', N = 10):
     """
     
     #read csv file 
-    df = pd.read_csv(infile + filename, 
+    df = pd.read_csv(infile, 
                      header = 1, delim_whitespace = True)
     #dictionary for rename columns
     columns = {'YYYY': 'year',
@@ -93,5 +86,4 @@ def plot_LombScargle(t, y, ax = None,
         
     return period, power
 
-        
         

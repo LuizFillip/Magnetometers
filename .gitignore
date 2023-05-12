@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun May  7 23:34:33 2023
-
-@author: Luiz
-"""
-
-/__pychace__/
-/src/__pychace__/
+/__pychace__/*
+/src/__pychace__/*
+/src/plotting/__pychace__/
