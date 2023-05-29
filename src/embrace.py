@@ -1,15 +1,9 @@
-import sys
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
-import datetime as dt
-import matplotlib.dates as dates
-import os
-
 from astropy.timeseries import LombScargle
 
 
-def setting_dataframe(infile, component = 'H(nT)', N = 10):
+def load(infile, component = None, N = 10):
     """
     Function for to organize magnetormeters data from EMBRACE (INPE).
     Here, returns dTrend array from the component desired with the 
@@ -38,13 +32,22 @@ def setting_dataframe(infile, component = 'H(nT)', N = 10):
     
     df.index = pd.to_datetime(df.index)
     
-    if component:
+   
+    
+    if component is not None:
         
         df['dtrend'] = (df[component] - 
                         df[component].rolling(window = N).mean())
         df = df.dropna()
     
     df.index = pd.to_datetime(df.index) 
+    
+    
+    for col in df.columns:
+        df.rename(
+            columns = {col: col.replace(
+                "(nT)", "").replace("(Deg)", "")},
+            inplace = True)
     return df
 
 
