@@ -2,70 +2,21 @@ from GEO import sites, year_fraction
 import pyIGRF
 import matplotlib.pyplot as plt
 import settings as s
-import magnetometers as mm
-import os
 import pandas as pd
+import magnetometers as mm
 
 
-def load_igrf(df, site = "saa"):
-   
-    lat, lon = sites[site]["coords"]
-    
-    out = {"D": [], "H": [], "Z": [], 
-           "I": [], "F": [], "X": [], 
-           "Y": []
-           }
-    for dn in df.index:
-        D, I, H, X, Y, Z, F = pyIGRF.igrf_value(
-            lat, 
-            lon, 
-            alt = 0, 
-            year = year_fraction(dn)
-            )
-        
-        for key in out.keys():
-            out[key].append(vars()[key])
-  
-    return pd.DataFrame(out, index = df.index)
 
 
-def plot_compare_igrf_embrace(df):
     
-    f = load_igrf()
-    
-    fig, ax = plt.subplots(
-        sharey = True,
-        dpi = 300)
-    
-    ax.axhline(f, label = "IGRF-12")
-    
-    ax.plot(df["F(nT)"], label = "Embrace", color = "r")
-    ax.legend()
-    
-    s.set_date_axis(ax)
-    
-    ax.set(ylabel = "F(nT)", 
-           xlabel = "Hora universal", 
-           title = df.index[0].date())
-    
-    
-infile = "database/magnetometers/"
 
-def concat_files(infile):
-    out = []
-    for filename in os.listdir(infile):
-        out.append(
-            mm.load(infile + filename)
-            )
-    return pd.concat(out)
+df = pd.read_csv("mag.txt", index_col=0)
+df.index = pd.to_datetime(df.index)
 
-df = concat_files(infile)
-# df["F(nT)"].plot()
 
-igr = load_igrf(df, site = "saa")
+igr = mm.load_igrf(df, site = "saa")
 
-igr
-#%%
+
 
 
 def plot_comparece_igrf_embrace(df, igr):
@@ -73,7 +24,7 @@ def plot_comparece_igrf_embrace(df, igr):
     fig, ax = plt.subplots(
         nrows = 2, 
         ncols = 2, 
-        figsize = (12, 8),
+        figsize = (16, 10),
         dpi = 300,
         sharex = True
         )
@@ -91,7 +42,7 @@ def plot_comparece_igrf_embrace(df, igr):
             [25900, 26200], 
             [26100, 26400]]
     c = s.chars()
-    
+    s.config_labels(fontsize = 20)
     for i, ax in enumerate(ax.flat):
         
         ax.text(0.05, 0.85, f'({c[i]}) {name[i]}', 
