@@ -31,14 +31,17 @@ def load_mag(
         
     df["F"] = df["F"] * 1e-9
     
-    df = df[~df.index.duplicated()] 
-    return df.resample(freq).asfreq()
+    #df = df[~df.index.duplicated()] 
+    return df.sort_index() #df.resample(freq).asfreq()
 
-# infile = 'database/magnetometers/mag2.txt'
-
-
-# df = load_by_time(infile)
-
-# df = load_mag()
-
-# df
+def test():
+    import datetime as dt
+    mag = load_mag()
+   # 2013-05-11 20:00:00
+    dn = dt.datetime(2013, 5, 11, 20, )
+    B = mag[mag.index == dn]['F']
+    #print(mag['F'].mean())
+    
+    
+    
+# test()
