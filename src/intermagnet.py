@@ -1,19 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 24 21:23:21 2022
-
-@author: LuizF
-"""
-
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import matplotlib.dates as dates
 import datetime
-
-import os.path
-import sys
-
+import datetime as dt 
 
 
 class intermagnet:
@@ -110,14 +98,19 @@ class intermagnet:
     def dataframe(self):
         
         # Read csv data files
-        self.df = pd.read_csv(self.infile + self.filename, 
-                         delim_whitespace = True, header = self.header)
+        self.df = pd.read_csv(
+            self.infile + self.filename, 
+            delim_whitespace = True,
+            header = self.header)
         
         # Setting index in datetime format
-        self.df.index = pd.to_datetime(self.df['DATE'] + ' ' + self.df['TIME'], 
-                                  infer_datetime_format = True)
+        self.df.index = pd.to_datetime(
+            self.df['DATE'] + ' ' + self.df['TIME'], 
+            infer_datetime_format = True)
         
-        self.df = self.df.drop(columns = ['DATE', 'TIME', 'DOY', '|'])
+        self.df = self.df.drop(
+            columns = ['DATE', 'TIME', 'DOY', '|']
+            )
         
         # Get code file (acronym for the station name)
         code = self.code.upper()
@@ -136,11 +129,14 @@ class intermagnet:
             columns = {f"{code}H": "H", f"{code}D": "D", 
                        f"{code}Z": "Z", f"{code}F": "F"}
             
-            self.df.rename(columns = columns, inplace = True)
+            self.df.rename(
+                columns = columns, inplace = True)
             
-            self.df['Y'] = self.df['H'] * np.sin(np.deg2rad(self.df['D']))
+            self.df['Y'] = self.df['H'] * np.sin(
+                np.deg2rad(self.df['D']))
             
-            self.df['X'] = self.df['H'] * np.cos(np.deg2rad(self.df['D']))
+            self.df['X'] = self.df['H'] * np.cos(
+                np.deg2rad(self.df['D']))
             
             
             self.df.index.name = self.name
@@ -159,47 +155,76 @@ def dtrend(df, component = 'H', limit = 200):
     df = df.dropna()    
     return df
 
-def get_filenames_from_codes(infile, sts = ['Pilar', 'Tatuoca',
-                                            'Guimar - Tenerife', 'San Fernando',
-                                            'Eskdalemuir', 'Lerwick', 
-                                            'Hartland', 'Hornsund']):
-    
-    '''
-    Find files by their code or station name (parameter: sts)
-    After cross related with the directory for to get the filenames
-    '''
-    path_all_files = ('C:/Users/LuizF/Google Drive/My Drive/Python/doctorate-master' +
-    '/MagnetometerAnalysis/Database/IntermagnetLocations.txt')
-    df = pd.read_csv(path_all_files, 
-                     delimiter=',')
-    
-    find_sts = df.loc[df['Station'].isin(sts)].sort_values(by=['Lat'])
-    
-    result = []
-    
-    _, _, files = next(os.walk(infile))
-   
-    
-    for code in find_sts['Code'].values:
-        for filename in files:   
-            if code.lower() == filename[:3]:
-                result.append(filename)
-    
-    return result
 
 
-def main():
-    files = get_filenames_from_codes('Database/Intermag/')
-    
-    filename = files[0]
-    
-    instance_ = intermagnet(filename, 'Database/Intermag/')
-    df = dtrend(instance_.dataframe, component = 'X')
-    print(df)
+pathin = 'magnetometers/data/2015/SJG/'
 
-files = ['hua20220115vmin.min.txt', 
-         'ttb20220115qmin.min', 'ipm20220115vmin.min.txt']
+# Função para verificar se uma linha é numérica
+def is_numeric_line(line):
+    parts = line.strip().split()
+    return all(part.lstrip('-').isdigit() for part in parts)
 
-for filename in files:
-    x = intermagnet(filename, 'MagnetometerAnalysis/Database/Intermag/')
-    print(f'[{x.name}, {x.code}, {x.latitude}, {x.longitude}],')
+# Função para ler o arquivo e extrair os dados
+def read_text_file(filename):
+    data = []
+
+    with open(filename, 'r') as file:
+        for line in file:
+            if is_numeric_line(line):
+             
+                numbers = list(map(int, line.strip().split()))
+                data.append(numbers)
+            else:
+                # Se quiser armazenar o texto também:
+                # print("Linha de texto encontrada:", line.strip())
+                pass
+
+    return data
+
+def fn2dn(fn):
+    strc = fn.split('.')[0].lower()
+    return dt.datetime.strptime(strc, '%b%d%y')
+
+
+fn = 'dec1915.sjg'
+
+
+def to_frame(infile):
+    l =  infile 
+    dn  = fn2dn(l.split('/')[-1])
+
+    data = read_text_file(infile)
+    
+    cols = ['x', 'y', 'z', 'f']
+    
+    df = pd.DataFrame(data).iloc[:, :4]
+    
+    df.columns = cols 
+    
+    times = pd.date_range(
+        dn, 
+        freq = '1min', 
+        periods = len(df)
+        )
+    
+    df.index = times 
+    
+    return df 
+
+# 
+
+# out = []
+# for fn in os.listdir(pathin):
+    
+#     out.append(to_frame(pathin + fn))
+    
+# df = pd.concat(out)
+
+# df['x'].plot() 
+
+fn = 'magnetometers/data/2015/dec1915.sjg'
+
+
+df = to_frame(fn)
+
+df['x'].plot() 

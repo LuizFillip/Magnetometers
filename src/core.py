@@ -1,7 +1,6 @@
 import os
 import magnetometers as mm
 import pandas as pd
-from common import load_by_time
 
 def concat_files(infile):
     out = []
@@ -41,7 +40,3 @@ def test():
     dn = dt.datetime(2013, 5, 11, 20, )
     B = mag[mag.index == dn]['F']
     #print(mag['F'].mean())
-    
-    
-    
-# test()
