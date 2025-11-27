@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime
 import datetime as dt 
-
+import os 
 
 class intermagnet:
     
@@ -18,7 +18,8 @@ class intermagnet:
            Path of direcotry where the files is it 
     Methods
     -------
-        dataframe: Pandas Datraframe (datetime index and components only)
+        dataframe: Pandas Datraframe 
+        (datetime index and components only)
     '''
     
     def __init__(self, filename, infile):
@@ -212,13 +213,14 @@ def to_frame(infile):
     return df 
 
 # 
-
-# out = []
-# for fn in os.listdir(pathin):
+def run_away(pathin):
     
-#     out.append(to_frame(pathin + fn))
-    
-# df = pd.concat(out)
+    out = []
+    for fn in os.listdir(pathin):
+        
+        out.append(to_frame(pathin + fn))
+        
+    df = pd.concat(out)
 
 # df['x'].plot() 
 
@@ -227,4 +229,17 @@ fn = 'magnetometers/data/2015/dec1915.sjg'
 
 df = to_frame(fn)
 
-df['x'].plot() 
+component = 'x'
+df['dtrend'] = (df[component] - df[component].rolling(window = 10).mean())
+df['dtrend'].plot() 
+
+
+fn = 'magnetometers/data/2015/dec1915.vss'
+
+df = to_frame(fn)
+
+df = df.loc[~(df['x'] > 1e6)]
+component = 'x'
+df['dtrend'] = (df[component] - df[component].rolling(window = 10).mean()) - 300
+df['dtrend'].plot() 
+
