@@ -211,35 +211,3 @@ def to_frame(infile):
     df.index = times 
     
     return df 
-
-# 
-def run_away(pathin):
-    
-    out = []
-    for fn in os.listdir(pathin):
-        
-        out.append(to_frame(pathin + fn))
-        
-    df = pd.concat(out)
-
-# df['x'].plot() 
-
-fn = 'magnetometers/data/2015/dec1915.sjg'
-
-
-df = to_frame(fn)
-
-component = 'x'
-df['dtrend'] = (df[component] - df[component].rolling(window = 10).mean())
-df['dtrend'].plot() 
-
-
-fn = 'magnetometers/data/2015/dec1915.vss'
-
-df = to_frame(fn)
-
-df = df.loc[~(df['x'] > 1e6)]
-component = 'x'
-df['dtrend'] = (df[component] - df[component].rolling(window = 10).mean()) - 300
-df['dtrend'].plot() 
-

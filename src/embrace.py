@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-
 
 def embrace(infile, component = None, N = 10):
     """
@@ -48,14 +46,3 @@ def embrace(infile, component = None, N = 10):
                 "(nT)", "").replace("(Deg)", "")},
             inplace = True)
     return df
-
-
-def running_mean(x, N):
-    
-    "Rununing average for array. N parameter it is a window (number of elements)"
-    cumsum = np.cumsum(np.insert(x, 0, 0)) 
-    return (cumsum[N:] - cumsum[:-N]) / float(N)
-
-
-
-
