@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt 
+import magnet as mg
 
 def plot_electrojet_stages(days, code):
     fig, ax = plt.subplots(
