@@ -6,19 +6,6 @@ import datetime as dt
 root = 'magnet/data/2015'
  
 
-def quiet_time(days, code = 'slz'):
-    
-   
-    out = []
-    for day in days:
-        fn = f'{root}/{code}{day}dec.15m'
-        df = mg.embrace(fn)
-        df = df.set_index('time')
-        
-        out.append(df['H'].to_frame(day))
-        
-    return pd.concat(out, axis = 1)
-
 def savgol_fn(
         series, 
         win_minutes=30, polyorder=2, mode='interp'):
@@ -67,9 +54,11 @@ def filter_and_avg(
     filtered = df.apply(lambda s: savgol_fn(s, **savgol_kwargs))
 
     # monta saída
-    out = pd.DataFrame({"h": filtered.mean(axis=1, skipna=True)})
+    out = pd.DataFrame(
+        {"h": filtered.mean(axis=1, skipna=True)})
     if std:
-        out["std"] = filtered.std(axis=1, ddof=1, skipna=True)
+        out["std"] = filtered.std(
+            axis=1, ddof=1, skipna=True)
 
     return out
 
@@ -87,8 +76,21 @@ def storm_time(days_dist, code = 'slz'):
     return pd.concat(out).to_frame(code)
 
 
+def quiet_time(days, code = 'slz'):
+    
+    out = []
+    for day in days:
+        fn = f'{root}/{code}{day}dec.15m'
+        df = mg.embrace(fn)
+        df = df.set_index('time')
+        
+        out.append(df['H'].to_frame(day))
+        
+    return pd.concat(out, axis = 1)
 
-def delta_quiet_time(d_quiet, code= 'slz'):
+
+def delta_quiet_time(d_quiet, code = 'slz'):
+    
     qt = filter_and_avg(quiet_time(d_quiet, code= code))
     
     mid = qt.loc[qt.index == 3, 'h'].item()
@@ -119,19 +121,24 @@ def repeat_quiet_time(code, d_distu, d_quiet):
     return pd.concat(out)
     
 
-def electrojet():
+def electrojet(c1 = 'slz', c2 = 'eus'):
     d_quiet = [13, 16, 18, 29]
     d_distu = [19, 20, 21, 22]
     
-    slz =  storm_time(d_distu, code = 'slz')
-    vss =  storm_time(d_distu, code = 'vss')
+    slz =  storm_time(d_distu, code = c1)
+    vss =  storm_time(d_distu, code = c2 )
     
-    q_slz = repeat_quiet_time('slz', d_distu, d_quiet)
-    q_vss = repeat_quiet_time('vss', d_distu, d_quiet)
+    q_slz = repeat_quiet_time(c1, d_distu, d_quiet)
+    q_vss = repeat_quiet_time(c2, d_distu, d_quiet)
     
     df = pd.DataFrame()
     
-    df['storm'] = slz['slz'] - vss['vss']
+    df['storm'] = slz[c1] - vss[c2]
     df['quiet'] = q_slz - q_vss 
     
-    return df.interpolate()
+    return df.interpolate(method = 'cubic', order = 3)
+
+
+
+# df = electrojet(c1 = 'slz', c2 = 'vss')
+# df.plot()

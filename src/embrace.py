@@ -1,4 +1,6 @@
 import pandas as pd
+import datetime as dt 
+import numpy as np 
 
 def embrace(infile, component = None, N = 10):
     """
@@ -46,3 +48,76 @@ def embrace(infile, component = None, N = 10):
                 "(nT)", "").replace("(Deg)", "")},
             inplace = True)
     return df
+
+
+def fn2dn(file, code = 'vss'):
+    fmt = f'{code}%d%b.%ym'
+    return dt.datetime.strptime(file, fmt)
+
+def dn2fn(dn, code = 'slz'):
+
+    return dn.strftime(f'{code}%d%b.%ym').lower()
+
+
+def mag_path(dn, code = 'slz'):
+    root = f'magnet/data/{dn.year}'
+    return f'{root}/' +  dn2fn(dn, code)
+
+def sub_midnight(df):
+    mid = df.loc[df.index.time == dt.time(3, 0), 'H'].item()
+    return df['H'] - mid
+
+def concat_days():
+    out = []
+    for day in [20, 21]:
+        dn = dt.datetime(2015, 12, day)
+        
+        infile = mag_path(dn, code = 'slz')
+        
+        out.append(embrace(infile) )
+    
+    
+    df = pd.concat(out)
+    
+    index = pd.date_range(df.index[0], df.index[-1], freq = '1min')
+    df = df.reindex(index, fill_value = np.nan)
+    return df 
+def delta_midnight(df):
+    h3 = df.between_time("03:00", "03:00")["H"]
+    
+    h3.index = h3.index.date
+    
+    df["H_03"] = df.index.date
+    df["H_03"] = df["H_03"].map(h3)
+    
+    df["H_norm"] = df["H"] - df["H_03"]
+    return df 
+# df.between_time("23:59", "00:00")['H_norm']
+def jump_correction(s):
+    dates = s.index.normalize()
+    
+    g = s.groupby(dates)
+    first = g.first()   # primeiro valor de cada dia
+    last  = g.last()    # último valor de cada dia
+    
+    # salto entre dias: primeiro de hoje - último de ontem
+    jump = first - last.shift(1)
+    
+    # para o primeiro dia não há salto
+    jump.iloc[0] = 0
+    
+    # (opcional) só considerar salto se for grande, ex.: > 20 nT
+    jump = jump.where(jump.abs() > 20, 0)
+    
+    corr_per_day = jump.cumsum()         # índice = datas
+    
+    # mapeia essa correção para cada timestamp da série original
+    corr = corr_per_day.reindex(dates).to_numpy()
+    
+    # série corrigida (removendo os saltos)
+    return s - corr
+
+# se quiser voltar para o DataFrame:
+# df['H_corr'] = s_corr
+
+jump_correction(df['H_norm']).plot()
