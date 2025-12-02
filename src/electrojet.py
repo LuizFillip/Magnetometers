@@ -62,28 +62,61 @@ def filter_and_avg(
 
     return out
 
+def jump_correction(s):
+    dates = s.index.normalize()
+    
+    g = s.groupby(dates)
+    first = g.first()   # primeiro valor de cada dia
+    last  = g.last()    # último valor de cada dia
+    
+    # salto entre dias: primeiro de hoje - último de ontem
+    jump = first - last.shift(1)
+    
+    # para o primeiro dia não há salto
+    jump.iloc[0] = 0
+    
+    jump = jump.where(jump.abs() > 20, 0)
+    
+    corr_per_day = jump.cumsum()         # índice = datas
+    
+    corr = corr_per_day.reindex(dates).to_numpy()
+    
+    return s - corr
 
-def storm_time(days_dist, code = 'slz'):
+def delta_midnight(df):
+    h3 = df.between_time("03:00", "03:00")["H"]
+    
+    h3.index = h3.index.date
+    
+    df["H_03"] = df.index.date
+    df["H_03"] = df["H_03"].map(h3)
+    
+    df["H_norm"] = df["H"] - df["H_03"]
+    return df 
+
+def storm_time(days_dist, code = 'slz', 
+               correct = True):
     
     out = []
     for day in days_dist:
-        fn = f'{root}/{code}{day}dec.15m'
-        df = mg.embrace(fn)
-        mid = df.loc[df.index.time == dt.time(3, 0), 'H'].item()
-        out.append(df['H'] - mid)
-        
-        
-    return pd.concat(out).to_frame(code)
+        dn = dt.datetime(2015, 12, day)
+        fn = mg.mag_path(dn, code = code)
+        out.append( delta_midnight(mg.embrace(fn))['H_norm'])
+    
+    ds = pd.concat(out)
+    if correct:
+        ds = jump_correction(ds)
+    return ds.to_frame(code)
 
 
 def quiet_time(days, code = 'slz'):
     
     out = []
     for day in days:
-        fn = f'{root}/{code}{day}dec.15m'
-        df = mg.embrace(fn)
-        df = df.set_index('time')
-        
+        dn = dt.datetime(2015, 12, day)
+        fn = mg.mag_path(dn, code = code)
+        df = mg.embrace(fn).set_index('time')
+    
         out.append(df['H'].to_frame(day))
         
     return pd.concat(out, axis = 1)
@@ -122,7 +155,7 @@ def repeat_quiet_time(code, d_distu, d_quiet):
     
 
 def electrojet(c1 = 'slz', c2 = 'eus'):
-    d_quiet = [13, 16, 18, 29]
+    d_quiet = [3, 13, 16, 18, 29]
     d_distu = [19, 20, 21, 22]
     
     slz =  storm_time(d_distu, code = c1)
@@ -140,5 +173,3 @@ def electrojet(c1 = 'slz', c2 = 'eus'):
 
 
 
-# df = electrojet(c1 = 'slz', c2 = 'vss')
-# df.plot()

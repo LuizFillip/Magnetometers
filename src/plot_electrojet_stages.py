@@ -12,13 +12,13 @@ def plot_electrojet_stages(days, code):
     plt.subplots_adjust(hspace = 0.1)
     
     
-    df = quiet_time(days, code= code)
+    df = mg.quiet_time(days, code= code)
     
     ax[0].plot(df)
      
     ax[0].plot(df.mean(axis = 1), lw = 4, color = 'k')
     
-    qt = filter_and_avg(df)
+    qt = mg.filter_and_avg(df)
     
     ax[1].fill_between(
         qt.index, 
@@ -36,3 +36,5 @@ def plot_electrojet_stages(days, code):
     
     ax[2].plot(qt['h'] - mid, label = '$\delta H$ (vassouras)')
 
+df =  mg.electrojet(c1 = 'slz', c2 = 'eus')
+# df.loc[df.index.time == dt.time(21, 55)]
