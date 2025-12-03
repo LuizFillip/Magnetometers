@@ -155,7 +155,7 @@ def repeat_quiet_time(code, d_distu, d_quiet):
     
 
 def electrojet(c1 = 'slz', c2 = 'eus'):
-    d_quiet = [3, 13, 16, 18, 29]
+    d_quiet = [3, 4, 30, 18, 28]
     d_distu = [19, 20, 21, 22]
     
     slz =  storm_time(d_distu, code = c1)
