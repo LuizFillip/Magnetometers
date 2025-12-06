@@ -62,7 +62,7 @@ def filter_and_avg(
 
     return out
 
-def jump_correction(s):
+def jump_correction(s, offset = 20):
     dates = s.index.normalize()
     
     g = s.groupby(dates)
@@ -72,10 +72,9 @@ def jump_correction(s):
     # salto entre dias: primeiro de hoje - último de ontem
     jump = first - last.shift(1)
     
-    # para o primeiro dia não há salto
     jump.iloc[0] = 0
     
-    jump = jump.where(jump.abs() > 20, 0)
+    jump = jump.where(jump.abs() > offset, 0)
     
     corr_per_day = jump.cumsum()         # índice = datas
     
