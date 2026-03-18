@@ -4,9 +4,11 @@ import numpy as np
 
 def embrace(infile, component = None, N = 10):
     """
-    Function for to organize magnetormeters data from EMBRACE (INPE).
+    Function for to organize magnetormeters data from 
+    EMBRACE (INPE).
     Here, returns dTrend array from the component desired with the 
-    running average. Moreover, it creates more two columns for the time: 
+    running average. Moreover, 
+    it creates more two columns for the time: 
     One in the datetime format (for dataframe index) and other it is
     running time (float array), the last can be used in numerical 
     analysis (Lomb Scargle, least squares, wavelets and others). 
@@ -78,7 +80,9 @@ def concat_days():
     
     df = pd.concat(out)
     
-    index = pd.date_range(df.index[0], df.index[-1], freq = '1min')
+    index = pd.date_range(
+        df.index[0], df.index[-1],
+                          freq = '1min')
     df = df.reindex(index, fill_value = np.nan)
     return df 
 
