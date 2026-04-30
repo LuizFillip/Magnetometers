@@ -1,2 +1,2 @@
 from .embrace import *
-from .electrojet import electrojet 
+from .intermagnet import *

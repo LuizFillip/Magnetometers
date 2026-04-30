@@ -18,14 +18,17 @@ def embrace(infile, component = None, N = 10):
     df = pd.read_csv(infile, 
                      header = 1, delim_whitespace = True)
     #dictionary for rename columns
-    columns = {'YYYY': 'year',
+    columns = {
+        'YYYY': 'year',
                'MM': 'month', 'DD': 'day', 
                'HH':'hour', 'MM.1':'minute'}
 
     df.rename(columns = columns, inplace = True)
 
-    df.index = pd.to_datetime(df[['day', 'month', 'year', 'hour', 
-                                  'minute']],infer_datetime_format = True)
+    df.index = pd.to_datetime(
+        df[['day', 'month', 
+            'year', 'hour', 
+             'minute']],infer_datetime_format = True)
     
     df['time'] = df['hour'] + (df['minute'] / 60)
     
@@ -59,38 +62,14 @@ def fn2dn(file, code = 'vss'):
 def dn2fn(dn, code = 'slz'):
     return dn.strftime(f'{code}%d%b.%ym').lower()
 
-
-def mag_path(dn, code = 'slz'):
-    root = f'magnet/data/{dn.year}'
+def embrace_path(dn, code = 'slz'):
+    root = f'magnet/data/{dn.year}/{code.upper()}'
     return f'{root}/' +  dn2fn(dn, code)
 
 def sub_midnight(df):
     mid = df.loc[df.index.time == dt.time(3, 0), 'H'].item()
     return df['H'] - mid
 
-def concat_days():
-    out = []
-    for day in [20, 21]:
-        dn = dt.datetime(2015, 12, day)
-        
-        infile = mag_path(dn, code = 'slz')
-        
-        out.append(embrace(infile) )
-    
-    
-    df = pd.concat(out)
-    
-    index = pd.date_range(
-        df.index[0], df.index[-1],
-                          freq = '1min')
-    df = df.reindex(index, fill_value = np.nan)
-    return df 
-
-
-# df.between_time("23:59", "00:00")['H_norm']
-
-
-# se quiser voltar para o DataFrame:
-# df['H_corr'] = s_corr
-
-# jump_correction(df['H_norm']).plot()
+def load_embrace(dn, code):
+  
+    return embrace(embrace_path(dn, code = code)) 

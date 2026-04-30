@@ -49,20 +49,7 @@ def storm_time(days_dist, code = 'slz',
         ds = jump_correction(ds)
     return ds.to_frame(code)
 
-
-def quiet_time(days, code = 'slz'):
-    
-    out = []
-    for day in days:
-        dn = dt.datetime(2015, 12, day)
-        fn = mg.mag_path(dn, code = code)
-        df = mg.embrace(fn).set_index('time')
-    
-        out.append(df['H'].to_frame(day))
-        
-    return pd.concat(out, axis = 1)
-
-
+ 
  
 
 # def electrojet(c1 = 'slz', c2 = 'eus'):
@@ -84,14 +71,32 @@ def quiet_time(days, code = 'slz'):
 
 
  
-dn = dt.datetime(2025, 1, 1)
 
 def EEJ(dn):
-    off_eq = delta_midnight(mg.load_embrace(dn, 'eus'))
+    off_eq = delta_midnight(mg.load_intermag(dn, 'vss'))
     
     in_eq = delta_midnight(mg.load_intermag(dn, 'ttb'))
     
-    return (in_eq['dH']  - off_eq['dH']).to_frame()
+    ds = (in_eq['dH']  - off_eq['dH']).to_frame()
+    
+    ds = ds.loc[~(ds['dH'] < -500)]
+    
+    return ds 
 
-EEJ(dn)
- 
+def save_electrojet():
+    start, end = '2025-01-01', '2025-05-01'
+    from tqdm import tqdm 
+    out = []
+    desc = 'Run EEJ'
+    dates = pd.date_range(start, end, desc)
+    for dn in tqdm(dates):
+        try:
+            out.append(EEJ(dn))
+        except:
+            continue
+        
+    df = pd.concat(out)
+    
+    fn = f'{start}_{end}'.replace('-', '')
+    df.to_csv(f'magnet/data/results/{fn}')
+     

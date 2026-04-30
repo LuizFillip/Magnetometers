@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Mar 18 09:11:59 2026
-
-@author: Luiz
-"""
+import datetime as dt 
+import pandas as pd 
 
 pathin = 'magnetometers/data/2015/SJG/'
 
@@ -58,3 +54,6 @@ def to_frame(infile):
     df.index = times 
     
     return df 
+
+# infile = 'magnet/data/2025/TTB/ttb20250101qmin.min'
+# to_frame(infile)
